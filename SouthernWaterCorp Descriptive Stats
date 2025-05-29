@@ -1,0 +1,111 @@
+import matplotlib as mpl
+import matplotlib.pyplot as plt 
+%matplotlib inline
+import seaborn as sns
+import pandas as pd
+import statsmodels.api as sm
+sns.set_style("darkgrid")
+mpl.rcParams['figure.figsize'] = (20,5)
+
+df_raw = pd.read_csv('DF_Raw_Data.csv')
+df_rsd = pd.read_csv('DF_Rolling_Stdev.csv')
+
+#Box plot for raw data
+df_raw.plot(kind = "box")
+plt.show()
+
+#Line plot for raw data
+df_raw.plot(kind = "line")
+plt.legend( loc='upper left')
+plt.show()
+
+#Box plot for rolling standard deviation data
+df_rsd.plot(kind = "box")
+plt.show()
+
+#Line plot for rolling standard deviation data
+df_rsd.plot(kind = "line")
+plt.show()
+
+
+#Prepare two datasets calling for Pump Failure options
+df_raw0 = df_raw[df_raw['PUMP FAILURE (1 or 0)'] == 0]
+df_raw1 = df_raw[df_raw['PUMP FAILURE (1 or 0)'] == 1]
+
+#Plot normal operations
+df_raw0.plot(kind = "box")
+plt.title("Normal Operation")
+plt.show()
+#Plot pump failure
+df_raw0.plot(kind = "box")
+plt.title("Pump Failure")
+plt.show()
+
+
+#Create Q1 & Q3
+Q1 = df_raw.quantile(0.25, axis=0, numeric_only=True)
+Q3 = df_raw.quantile(0.75, axis=0, numeric_only=True)
+#Create IQR
+IQR = Q3 - Q1
+IQR
+#df_raw.info()
+
+
+
+#Lower and Upper limits
+Lower = Q1 - 1.5 * IQR
+Upper = Q3 + 1.5 * IQR
+#Dataframe w/ outliers
+condition = (df_raw[IQR.index] < Lower) | (df_raw[IQR.index] > Upper)
+outliers = df_raw[(condition).any(axis=1)]
+outliers.shape
+
+#Percent of data not affected by outliers
+percent = 1-(outliers.size/df_raw.size)
+print(round(percent*100, 2), "% of the data still remains after removing outliers.")
+
+
+#Create dataframe w/o outliers
+no_outliers = df_raw.loc[~(condition).any(axis=1)]
+no_outliers.shape
+
+#Plotting Normal Behaviour without Outliers
+no_outliers[no_outliers['PUMP FAILURE (1 or 0)'] == 0].plot(kind = "box")
+plt.title("Normal Behaviour")
+plt.show()
+
+#Plotting Pump Failure without Outliers
+no_outliers[no_outliers['PUMP FAILURE (1 or 0)'] == 1].plot(kind = "box")
+plt.title("Pump Failure")
+plt.show()
+
+
+#Select numeric columns
+List = df_raw.select_dtypes(include = ['number']).columns
+#Set timeframe as index
+df_raw = df_raw.set_index(df_raw['TIMEFRAME (DD/MM/YYYY)'])
+
+#For each numeric column, plot the data, and on the same x-axis, plot the Pump Failure data
+for i in List: 
+    ax1 = df_raw[i].plot()
+    ax2 = ax1.twinx()
+    ax2.plot(df_raw['PUMP FAILURE (1 or 0)'], color = 'red')
+    plt.title(i)
+    plt.show()
+
+#Set timeframe as index
+df_rsd = df_rsd.set_index(df_rsd['TIMEFRAME (DD/MM/YYYY)'])
+df_rsd_f = df_rsd[(df_rsd.index > "10/12/2014 12:00") & (df_rsd.index <= "10/12/2014 14:30")]
+#For each numeric column, plot the data, and on the same x-axis, plot the Pump Failure data
+for i in List: 
+    a1 = df_rsd_f[i].plot()
+    a1.xaxis.set_major_locator(plt.MaxNLocator(10))
+    a2 = a1.twinx()
+    a2.plot(df_rsd_f['PUMP FAILURE (1 or 0)'], color = 'red')
+    a2.xaxis.set_major_locator(plt.MaxNLocator(10))
+    plt.title(i)
+    plt.show()
+
+
+
+
