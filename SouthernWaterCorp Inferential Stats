@@ -1,0 +1,77 @@
+#Define dataframe with Pearson's correlation coefficient(r): Raw data 
+dfraw_cor = df_raw[List].corr(method = 'pearson')
+#Plot heatmap
+plt.figure(figsize=(12, 10))
+sns.heatmap(dfraw_cor, annot = True, cmap='coolwarm')
+plt.show()
+
+#Raw data correlation dataframe
+dfraw_cor
+
+#Define df with correlation coefficient of all variables with respect to Pump failure
+dfraw_pump_cor = dfraw_cor.iloc[:, [7]].sort_values('PUMP FAILURE (1 or 0)', ascending = False)
+#Plot r values
+dfraw_pump_cor.plot(kind = 'bar')
+plt.show()
+
+#Define dataframe with Pearson's correlation coefficient(r): Rollding StDev data 
+dfrsd_cor = df_rsd[List].corr(method = 'pearson')
+#Plot heatmap
+plt.figure(figsize=(12, 10))
+sns.heatmap(dfrsd_cor, annot = True, cmap='coolwarm')
+plt.show()
+
+#Dataframe_Raw
+#Define indpendent and dependent variables
+raw = df_raw[List]
+raw_ind = raw.iloc[:, 0 : 7] #All variables except pump failure
+raw_dep = raw.iloc[:, -1] #Pump failure
+
+#Add constants column to account for bias
+raw_ind = sm.add_constant(raw_ind)
+
+#Ordinary least squares for linear regresion
+raw_reg = sm.OLS(raw_dep,raw_ind).fit() 
+
+#Show OLS regression results
+raw_reg.summary()
+
+#Dataframe_Stdev
+#Define indpendent and dependent variables
+rsd = df_rsd[List]
+rsd_ind = rsd.iloc[:, 0 : 7] #All variables except pump failure
+rsd_dep = rsd.iloc[:, -1] #Pump failure
+
+#Add constants column to account for bias
+rsd_ind = sm.add_constant(rsd_ind)
+
+#Ordinary least squares for linear regresion
+rsd_reg = sm.OLS(rsd_dep,rsd_ind).fit() 
+
+#Show OLS regression results
+rsd_reg.summary()
+
+raw_ind.head()
+#raw.head()
+
+#Extract coefficients from OLS summary
+rsd_coef = rsd_reg.params
+rsd_coef = rsd_coef.sort_values(ascending = True) # Sort values
+
+#Plot
+rsd_coef.plot(kind = "bar")
+plt.show()
+
+#Prepare the data
+df_rsd['Prediction'] = rsd_reg.predict(rsd_ind)
+p_rsd= df_rsd[df_rsd.select_dtypes(include = ['number']).columns]
+new_order = ['PUMP FAILURE (1 or 0)', 'Prediction', 'Volumetric Flow Meter 2', 'Horse Power', 'Pump Efficiency']
+rsd1 = p_rsd[new_order[0:2]]
+rsd2 = p_rsd[new_order[2:5]]
+
+#Plot the data
+axis1 = rsd1.plot()
+axis2 = axis1.twinx()
+axis2.plot(rsd2)
+plt.show()
+
