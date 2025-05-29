@@ -1,0 +1,23 @@
+# Group data by neighbourhood and revenue
+#Filtering neighborhood groups
+airbnb_df_v = airbnb_df[airbnb_df.neighbourhood_group.isin(['Brooklyn', 'Manhattan', 'Queens'])]
+#Group by neighborhoods ands neghborhood groups
+airbnb_df_group = airbnb_df_v.groupby(['neighbourhood_group', 'neighbourhood'])['Revenue'].sum().reset_index().sort_values('Revenue', ascending=False)
+airbnb_df_group = airbnb_df_group.reset_index()
+airbnb_df_group = airbnb_df_group.groupby('neighbourhood_group').head(3) 
+airbnb_df_group
+
+import matplotlib.pyplot as plt 
+
+airbnb_df_group2 = airbnb_df_v[airbnb_df_v['neighbourhood'].isin(airbnb_df_group['neighbourhood'])]
+
+    
+# #Separate df for top 9 revenue- room_type
+airbnb_df_group2 = airbnb_df_group2.groupby(['neighbourhood', 'room_type'])['Revenue'].mean().reset_index().sort_values('Revenue', ascending=False)
+airbnb_df_group2 = airbnb_df_group2.reset_index()
+airbnb_df_bar2 = airbnb_df_group2.groupby('room_type').head(3)
+airbnb_df_bar2
+
+
+airbnb_df_bar2.plot(x =  'neighbourhood', y = 'Revenue', kind = "bar", legend = False)
+plt.title("Popular Airbnb Neighborhoods by Room Type")
