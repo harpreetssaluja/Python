@@ -1,0 +1,15 @@
+import pandas as pd
+
+airbnb_df = pd.read_csv("airbnb_2.csv")
+
+# Count how many airbnb listings are in each of the 5 Neighbourhood Groups 
+airbnb_df['neighbourhood_group'].value_counts()
+# Airbnb listingscount as a percentage 
+airbnb_df['neighbourhood_group'].value_counts(normalize = True)
+
+# Make a Revenue column
+airbnb_df['Revenue'] = airbnb_df['price'] * airbnb_df['number_of_reviews']
+airbnb_df.head()
+airbnb_revenue = airbnb_df.groupby('neighbourhood_group')['Revenue'].mean().sort_values(ascending = False)
+airbnb_revenue.plot(kind = 'bar')
+
