@@ -1,0 +1,38 @@
+import pandas as pd
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+dataframe = pd.read_csv("adult_census_data.csv")
+
+df = dataframe
+df.head()
+df.columns
+
+#Filtering columns
+df = df[[' State-gov', ' Bachelors', ' Never-married',
+       ' Adm-clerical', ' Not-in-family', ' White', ' Male',' United-States', ' <=50K']]
+
+df.head()
+
+#Renaming Columns
+df.columns = ['Employment Type', 'Degree Status', 'Marriage-Status', 'Job-Role', 'Family-Role', 'Ethnicity', 'Gender', 'Country', 'Earnings']
+df.head()
+
+#Job Role distribution
+df["Job-Role"].value_counts(sort = True, ascending = True).plot(kind = "bar", title = "Count of Unique Job Roles", xlabel = "Job Role", ylabel = "Count")
+
+df_1 = df[(df['Degree Status'] == ' HS-grad') & (df['Earnings'] == ' <=50K')] #Filter data set
+#Count, sort, and plot
+df_1['Job-Role'].value_counts(sort = True, ascending = False).plot(kind = 'bar', title = "Individuals with High School Diploma below 50K", xlabel = "Job Role", ylabel = "Count")
+
+df_2 = df[(df['Degree Status'] == ' HS-grad') & (df['Earnings'] == ' >50K')] #Filter data set
+#Count, sort, and plot
+df_2['Job-Role'].value_counts(sort = True, ascending = False).plot(kind = 'bar', title = "Individuals with High School Diploma above 50K", xlabel = "Job Role", ylabel = "Count")
+
+df.Earnings.unique()
+
+df_c = df[df['Earnings'] == ' >50K'] #Filter
+#Count, normalize, and sort
+df_c['Job-Role'].value_counts(sort= True, ascending = False, normalize = True).head(1)
+
+df_c.columns
+
